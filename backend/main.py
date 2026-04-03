@@ -1,22 +1,25 @@
-import asyncio
 from dotenv import load_dotenv
-from graph.build_graph import build_graph
-
 
 load_dotenv()
 
-async def main():
-    graph = build_graph()
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-    result = await graph.ainvoke({
-        "command": "Generate daily briefing",
-        "logs": []
-    })
+app = FastAPI(
+    title="Saar API",
+    description="Personalized daily briefing backend",
+    version="0.1.0",
+)
 
-    print("\nFinal State:")
-    print(result)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
-
+@app.get("/health")
+async def health_check() -> dict[str, str]:
+    return {"status": "ok"}

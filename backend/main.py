@@ -2,8 +2,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from auth.middleware import get_current_user
+from auth.routes import router as auth_router
 
 app = FastAPI(
     title="Saar API",
@@ -19,7 +22,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Auth routes (unprotected)
+app.include_router(auth_router)
+
 
 @app.get("/health")
 async def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/me")
+async def get_me(user: dict = Depends(get_current_user)) -> dict:
+    """Protected endpoint — returns current user info from JWT."""
+    return user

@@ -68,7 +68,7 @@ function OnboardingWizard() {
           },
         }),
       });
-      router.push("/");
+      router.push("/briefing");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);

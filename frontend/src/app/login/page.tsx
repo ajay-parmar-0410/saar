@@ -15,7 +15,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   if (user) {
-    router.replace("/");
+    router.replace("/briefing");
     return null;
   }
 

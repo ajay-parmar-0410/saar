@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auth.middleware import get_current_user
 from auth.routes import router as auth_router
+from api.v1.onboarding import router as onboarding_router
 
 app = FastAPI(
     title="Saar API",
@@ -24,6 +25,9 @@ app.add_middleware(
 
 # Auth routes (unprotected)
 app.include_router(auth_router)
+
+# API routes (protected)
+app.include_router(onboarding_router)
 
 
 @app.get("/health")

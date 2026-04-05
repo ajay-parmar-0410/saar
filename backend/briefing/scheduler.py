@@ -47,7 +47,7 @@ async def generate_user_briefing(
 
     Returns the stored briefing DB record, or None on failure.
     """
-    logger.info("Generating briefing for user %s", user_id)
+    logger.warning("Generating briefing for user %s | sources=%s | topics=%s", user_id, sources, topics)
 
     try:
         # Stage 1: Fetch from all configured sources
@@ -61,9 +61,11 @@ async def generate_user_briefing(
         # Flatten all items from all sources
         all_items: list[SourceItem] = []
         for result in source_results:
+            if result.error:
+                logger.warning("Source '%s' failed: %s", result.source_name, result.error)
             all_items.extend(result.items)
 
-        logger.info("Fetched %d items from %d sources", len(all_items), len(source_results))
+        logger.warning("Fetched %d items from %d sources", len(all_items), len(source_results))
 
         if not all_items:
             logger.warning("No items fetched for user %s — skipping briefing", user_id)

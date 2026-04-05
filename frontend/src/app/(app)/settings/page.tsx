@@ -55,7 +55,7 @@ const SOURCE_OPTIONS = [
   "google_news",
   "yahoo_finance",
   "economic_times",
-  "weather",
+  "weatherapi",
 ];
 
 const TIME_OPTIONS = [

@@ -1,5 +1,6 @@
 """JWT verification middleware for FastAPI."""
 
+import logging
 import os
 from typing import Annotated
 
@@ -7,6 +8,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+logger = logging.getLogger(__name__)
 security = HTTPBearer()
 
 SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
@@ -39,11 +41,13 @@ def verify_token(token: str) -> dict:
         )
         return payload
     except jwt.ExpiredSignatureError:
+        logger.warning("Token expired")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        logger.warning("Invalid token: %s | secret_len=%d | token_prefix=%s", e, len(secret), token[:20])
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",

@@ -159,7 +159,8 @@ export default function BriefingPage() {
       )}
 
       {/* Sections */}
-      {briefing.sections.map((section: Record<string, unknown>) => {
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {briefing.sections.map((section: any) => {
         const sectionName = (section.title || section.name || section.key || "Section") as string;
         const items = (section.items || []) as BriefingItem[];
         return (

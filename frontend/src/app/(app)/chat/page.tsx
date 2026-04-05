@@ -21,11 +21,36 @@ export default function ChatPage() {
     if (!session?.access_token) return;
     const load = async () => {
       try {
-        const data = await apiFetch<ChatMessage[]>(
+        interface HistoryEntry {
+          id: string;
+          query: string;
+          response: string;
+          sources: { title: string; url: string; source: string }[];
+          created_at: string | null;
+        }
+        const data = await apiFetch<{ messages: HistoryEntry[]; total: number }>(
           "/api/v1/chat/history?limit=50",
           { token: session.access_token }
         );
-        setMessages(data);
+        // Convert query/response pairs into user/assistant messages
+        const msgs: ChatMessage[] = [];
+        for (const entry of data.messages) {
+          msgs.push({
+            id: `${entry.id}-q`,
+            role: "user",
+            content: entry.query,
+            sources: [],
+            created_at: entry.created_at || "",
+          });
+          msgs.push({
+            id: `${entry.id}-a`,
+            role: "assistant",
+            content: entry.response,
+            sources: entry.sources || [],
+            created_at: entry.created_at || "",
+          });
+        }
+        setMessages(msgs);
       } catch {
         // Start with empty chat
       } finally {
@@ -63,7 +88,7 @@ export default function ChatPage() {
       const res = await apiFetch<ChatResponse>("/api/v1/chat", {
         method: "POST",
         token: session.access_token,
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({ query: trimmed }),
       });
 
       const assistantMsg: ChatMessage = {

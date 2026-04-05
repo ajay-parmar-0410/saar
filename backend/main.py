@@ -41,12 +41,24 @@ app = FastAPI(
 )
 
 # --- Middleware (order matters: last added = first executed) ---
+import os
+
+_allowed_origins = [
+    "http://localhost:3000",
+]
+_frontend_url = os.environ.get("FRONTEND_URL", "").strip().rstrip("/")
+if _frontend_url:
+    _allowed_origins.append(_frontend_url)
+
+import logging as _logging
+_logging.getLogger(__name__).info("CORS allowed origins: %s", _allowed_origins)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(RateLimitMiddleware)
 

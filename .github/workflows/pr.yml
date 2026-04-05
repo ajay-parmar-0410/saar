@@ -1,0 +1,200 @@
+name: PR Pipeline
+
+on:
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: pr-${{ github.head_ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  # Test-only env vars (no real secrets needed for unit tests)
+  SUPABASE_JWT_SECRET: "ci-test-secret-key-for-jwt-signing-32bytes"
+  SUPABASE_URL: "https://test.supabase.co"
+  SUPABASE_SERVICE_ROLE_KEY: "ci-test-service-key"
+  SUPABASE_ANON_KEY: "ci-test-anon-key"
+  GROQ_API_KEY: "ci-test-groq-key"
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Stage 1: Lint & Type Check (parallel)
+  # ──────────────────────────────────────────────
+  lint-backend:
+    name: "Lint: Backend (ruff + bandit)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install ruff bandit
+      - name: Ruff lint
+        run: ruff check backend/ --exclude backend/venv
+      - name: Bandit security scan
+        run: bandit -r backend/ -ll --exclude backend/venv,backend/tests
+
+  lint-frontend:
+    name: "Lint: Frontend (eslint + tsc)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci --legacy-peer-deps
+      - name: ESLint
+        run: cd frontend && npm run lint
+      - name: TypeScript check
+        run: cd frontend && npx tsc --noEmit
+
+  audit:
+    name: "Audit: Dependencies"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: pip install pip-audit
+      - name: Python audit
+        run: pip-audit -r backend/requirements.txt
+      - name: Node audit
+        run: cd frontend && npm audit --audit-level=high || true
+
+  # ──────────────────────────────────────────────
+  # Stage 2: Unit Tests (parallel, after lint)
+  # ──────────────────────────────────────────────
+  test-backend-unit:
+    name: "Test: Backend Unit"
+    needs: [lint-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install dependencies
+        run: cd backend && pip install -r requirements.txt && pip install pytest pytest-asyncio pytest-cov
+      - name: Run unit tests
+        run: cd backend && python -m pytest tests/unit/ -v --cov=. --cov-report=term-missing -q
+        env:
+          SUPABASE_JWT_SECRET: ${{ env.SUPABASE_JWT_SECRET }}
+
+  test-frontend:
+    name: "Test: Frontend (vitest + contracts)"
+    needs: [lint-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci --legacy-peer-deps
+      - name: Run vitest
+        run: cd frontend && npm run test
+
+  # ──────────────────────────────────────────────
+  # Stage 3: Integration Tests (after unit)
+  # ──────────────────────────────────────────────
+  test-backend-integration:
+    name: "Test: Backend Integration"
+    needs: [test-backend-unit]
+    runs-on: ubuntu-latest
+    # Only run if real Supabase secrets are available
+    if: ${{ vars.RUN_INTEGRATION_TESTS == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install dependencies
+        run: cd backend && pip install -r requirements.txt && pip install pytest pytest-asyncio
+      - name: Run integration tests
+        run: cd backend && python -m pytest tests/integration/ -v -q
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_JWT_SECRET: ${{ secrets.SUPABASE_JWT_SECRET }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+
+  # ──────────────────────────────────────────────
+  # Stage 4: Build Check (after unit tests)
+  # ──────────────────────────────────────────────
+  build-check:
+    name: "Build: Verify"
+    needs: [test-backend-unit, test-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Backend startup check
+        run: |
+          cd backend && pip install -r requirements.txt
+          python -c "from main import app; print('Backend OK')"
+
+      - name: Frontend build
+        run: |
+          cd frontend && npm ci --legacy-peer-deps
+          npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://test.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-key"
+          NEXT_PUBLIC_API_URL: "http://localhost:8000"
+
+  # ──────────────────────────────────────────────
+  # Stage 5: E2E Tests (after build)
+  # ──────────────────────────────────────────────
+  test-e2e:
+    name: "Test: E2E (Playwright)"
+    needs: [build-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci --legacy-peer-deps
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        run: cd frontend && npx playwright test --project=chromium-desktop
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "https://test.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "test-key"
+          NEXT_PUBLIC_API_URL: "http://localhost:8000"
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

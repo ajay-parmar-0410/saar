@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { useApi } from "@/hooks/use-api";
+import { useApi, useApiMutation } from "@/hooks/use-api";
 import type { Briefing } from "@/lib/types";
 import { BriefingCard } from "@/components/briefing/briefing-card";
 import { BriefingSkeleton } from "@/components/briefing/briefing-skeleton";
@@ -14,6 +14,17 @@ export default function BriefingPage() {
   );
   const [refreshing, setRefreshing] = useState(false);
   const touchStartY = useRef(0);
+  const { mutate: generateBriefing, loading: generating } = useApiMutation<void, Briefing>(
+    "/api/v1/briefings/generate",
+    "POST"
+  );
+
+  const handleGenerate = useCallback(async () => {
+    const result = await generateBriefing();
+    if (result) {
+      await refetch();
+    }
+  }, [generateBriefing, refetch]);
 
   const briefing = briefings?.[0] ?? null;
 
@@ -75,12 +86,18 @@ export default function BriefingPage() {
           <RefreshCw className="size-7 text-muted-foreground" />
         </div>
         <h2 className="text-lg font-semibold">
-          Your briefing is being prepared...
+          No briefing yet
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Check back shortly. We&apos;re gathering and filtering the latest
-          updates for you.
+          Generate your first briefing now, or wait for your scheduled time.
         </p>
+        <button
+          onClick={handleGenerate}
+          disabled={generating}
+          className="mt-4 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        >
+          {generating ? "Generating..." : "Generate Now"}
+        </button>
       </div>
     );
   }

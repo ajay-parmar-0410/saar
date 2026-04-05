@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from auth.middleware import get_current_user
 from db.briefings import get_briefing, get_user_briefings, mark_as_read
+from db.preferences import get_preferences
+from db.interests import get_interests
 from schemas.briefings import (
     BriefingDetail,
     BriefingListResponse,
@@ -12,6 +14,54 @@ from schemas.briefings import (
 )
 
 router = APIRouter(prefix="/api/v1/briefings", tags=["briefings"])
+
+
+@router.post("/generate", response_model=BriefingDetail)
+async def trigger_briefing(
+    user: dict = Depends(get_current_user),
+) -> BriefingDetail:
+    """Manually trigger a briefing generation for the current user."""
+    from briefing.scheduler import generate_user_briefing
+
+    prefs = get_preferences(user["id"])
+    if not prefs:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Complete onboarding first",
+        )
+
+    interests_list = get_interests(user["id"])
+    interest_names = [i["name"] for i in interests_list]
+
+    result = await generate_user_briefing(
+        user_id=user["id"],
+        user_types=prefs.get("user_types", ["general"]),
+        topics=prefs.get("topics", []),
+        sources=prefs.get("sources", []),
+        interests=interest_names,
+        location=prefs.get("location", ""),
+        briefing_depth=prefs.get("briefing_depth", "detailed"),
+        watchlist_symbols=prefs.get("watchlist_symbols"),
+    )
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Briefing generation failed — check source availability",
+        )
+
+    return BriefingDetail(
+        id=result["id"],
+        user_id=result["user_id"],
+        content=result.get("content", ""),
+        sections=result.get("sections", []),
+        top_story=result.get("top_story", ""),
+        item_count=result.get("item_count", 0),
+        alert_count=result.get("alert_count", 0),
+        read=result.get("read", False),
+        read_at=result.get("read_at"),
+        generated_at=result.get("generated_at"),
+    )
 
 
 @router.get("", response_model=BriefingListResponse)

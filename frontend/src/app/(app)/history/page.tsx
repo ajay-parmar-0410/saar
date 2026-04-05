@@ -1,17 +1,33 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useApi } from "@/hooks/use-api";
 import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api";
-import type { Briefing, BriefingListItem } from "@/lib/types";
+import type { Briefing, BriefingItem } from "@/lib/types";
 import { BriefingCard } from "@/components/briefing/briefing-card";
 import { Clock, ChevronDown, Loader2, Inbox } from "lucide-react";
+
+interface BriefingSummaryItem {
+  id: string;
+  top_story: string;
+  item_count: number;
+  alert_count: number;
+  read: boolean;
+  generated_at: string | null;
+}
+
+interface BriefingListResponse {
+  briefings: BriefingSummaryItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
 
 export default function HistoryPage() {
   const { session } = useAuth();
   const [page, setPage] = useState(1);
-  const [allItems, setAllItems] = useState<BriefingListItem[]>([]);
+  const [allItems, setAllItems] = useState<BriefingSummaryItem[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -20,32 +36,28 @@ export default function HistoryPage() {
   );
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  const { loading, error } = useApi<BriefingListItem[]>(
+  const { data: initialData, loading, error } = useApi<BriefingListResponse>(
     "/api/v1/briefings?limit=10&offset=0"
   );
 
-  // Initial load handled by useApi — sync results into allItems
-  const { data: initialData } = useApi<BriefingListItem[]>(
-    "/api/v1/briefings?limit=10&offset=0"
-  );
-
-  // Sync initial data once
-  if (initialData && allItems.length === 0) {
-    setAllItems(initialData);
-    if (initialData.length < 10) setHasMore(false);
-  }
+  useEffect(() => {
+    if (initialData?.briefings && allItems.length === 0) {
+      setAllItems(initialData.briefings);
+      if (initialData.briefings.length < 10) setHasMore(false);
+    }
+  }, [initialData, allItems.length]);
 
   const loadMore = useCallback(async () => {
     if (!session?.access_token || loadingMore || !hasMore) return;
     setLoadingMore(true);
     try {
-      const data = await apiFetch<BriefingListItem[]>(
+      const data = await apiFetch<BriefingListResponse>(
         `/api/v1/briefings?limit=10&offset=${page * 10}`,
         { token: session.access_token }
       );
-      setAllItems((prev) => [...prev, ...data]);
+      setAllItems((prev) => [...prev, ...data.briefings]);
       setPage((prev) => prev + 1);
-      if (data.length < 10) setHasMore(false);
+      if (data.briefings.length < 10) setHasMore(false);
     } catch {
       // Silently fail load more
     } finally {
@@ -111,7 +123,7 @@ export default function HistoryPage() {
 
       <div className="space-y-3">
         {allItems.map((item) => {
-          const date = new Date(item.created_at);
+          const date = item.generated_at ? new Date(item.generated_at) : new Date();
           const isExpanded = expandedId === item.id;
 
           return (
@@ -131,9 +143,9 @@ export default function HistoryPage() {
                           day: "numeric",
                         })}
                       </div>
-                      {item.top_story_title && (
+                      {item.top_story && (
                         <div className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                          {item.top_story_title}
+                          {item.top_story}
                         </div>
                       )}
                     </div>
@@ -164,17 +176,18 @@ export default function HistoryPage() {
                     </div>
                   ) : expandedBriefing ? (
                     <>
-                      {expandedBriefing.top_story && (
-                        <BriefingCard
-                          item={expandedBriefing.top_story}
-                          featured
-                        />
+                      {expandedBriefing.top_story && typeof expandedBriefing.top_story === "string" && (
+                        <div className="rounded-lg border border-border bg-card p-4">
+                          <p className="text-sm font-medium">{expandedBriefing.top_story}</p>
+                        </div>
                       )}
-                      {expandedBriefing.sections.map((section) =>
-                        section.items.map((si) => (
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      {expandedBriefing.sections.map((section: any) => {
+                        const items = (section.items || []) as BriefingItem[];
+                        return items.map((si) => (
                           <BriefingCard key={si.title} item={si} />
-                        ))
-                      )}
+                        ));
+                      })}
                     </>
                   ) : (
                     <p className="py-4 text-center text-sm text-muted-foreground">

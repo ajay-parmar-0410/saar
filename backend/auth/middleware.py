@@ -32,11 +32,19 @@ def verify_token(token: str) -> dict:
     Raises HTTPException on invalid/expired tokens.
     """
     secret = _get_jwt_secret()
+
+    # Log the token header to debug algorithm mismatch
+    try:
+        header = jwt.get_unverified_header(token)
+        logger.info("Token header: alg=%s", header.get("alg"))
+    except Exception:
+        pass
+
     try:
         payload = jwt.decode(
             token,
             secret,
-            algorithms=["HS256"],
+            algorithms=["HS256", "HS384", "HS512"],
             audience="authenticated",
         )
         return payload

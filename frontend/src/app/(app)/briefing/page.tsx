@@ -2,16 +2,32 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useApi, useApiMutation } from "@/hooks/use-api";
-import type { Briefing } from "@/lib/types";
+import type { Briefing, BriefingItem } from "@/lib/types";
 import { BriefingCard } from "@/components/briefing/briefing-card";
 import { BriefingSkeleton } from "@/components/briefing/briefing-skeleton";
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 
+interface BriefingListResponse {
+  briefings: { id: string }[];
+  total: number;
+}
+
 export default function BriefingPage() {
-  const { data: briefings, loading, error, refetch } = useApi<Briefing[]>(
+  const { data: listData, loading: listLoading, error: listError, refetch: refetchList } = useApi<BriefingListResponse>(
     "/api/v1/briefings?limit=1"
   );
+
+  const latestId = listData?.briefings?.[0]?.id ?? null;
+
+  const { data: briefing, loading: detailLoading, error: detailError, refetch: refetchDetail } = useApi<Briefing>(
+    `/api/v1/briefings/${latestId}`,
+    { skip: !latestId }
+  );
+
+  const loading = listLoading || detailLoading;
+  const error = listError || detailError;
+
   const [refreshing, setRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const { mutate: generateBriefing, loading: generating } = useApiMutation<void, Briefing>(
@@ -22,11 +38,14 @@ export default function BriefingPage() {
   const handleGenerate = useCallback(async () => {
     const result = await generateBriefing();
     if (result) {
-      await refetch();
+      await refetchList();
     }
-  }, [generateBriefing, refetch]);
+  }, [generateBriefing, refetchList]);
 
-  const briefing = briefings?.[0] ?? null;
+  const refetch = useCallback(async () => {
+    await refetchList();
+    if (latestId) await refetchDetail();
+  }, [refetchList, refetchDetail, latestId]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -120,7 +139,17 @@ export default function BriefingPage() {
       <p className="mb-6 text-xs text-muted-foreground">{today}</p>
 
       {/* Top Story */}
-      {briefing.top_story && (
+      {briefing.top_story && typeof briefing.top_story === "string" && (
+        <div className="mb-6">
+          <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+            Top Story
+          </h2>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm">{briefing.top_story}</p>
+          </div>
+        </div>
+      )}
+      {briefing.top_story && typeof briefing.top_story === "object" && (
         <div className="mb-6">
           <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
             Top Story
@@ -130,18 +159,22 @@ export default function BriefingPage() {
       )}
 
       {/* Sections */}
-      {briefing.sections.map((section) => (
-        <div key={section.name} className="mb-6">
-          <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-            {section.name}
-          </h2>
-          <div className="space-y-2">
-            {section.items.map((item) => (
-              <BriefingCard key={item.title} item={item} />
-            ))}
+      {briefing.sections.map((section: Record<string, unknown>) => {
+        const sectionName = (section.title || section.name || section.key || "Section") as string;
+        const items = (section.items || []) as BriefingItem[];
+        return (
+          <div key={sectionName} className="mb-6">
+            <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+              {sectionName}
+            </h2>
+            <div className="space-y-2">
+              {items.map((item) => (
+                <BriefingCard key={item.title} item={item} />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Link to history */}
       <div className="border-t border-border pt-4 text-center">

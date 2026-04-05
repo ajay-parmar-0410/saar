@@ -3,6 +3,8 @@
 import xml.etree.ElementTree as ET
 from html import unescape
 
+import defusedxml.ElementTree as SafeET
+
 import httpx
 
 from sources.types import SourceItem, SourceResult
@@ -29,7 +31,7 @@ async def fetch_rss(
         resp = await client.get(url, timeout=5, follow_redirects=True)
         resp.raise_for_status()
 
-    root = ET.fromstring(resp.text)
+    root = SafeET.fromstring(resp.text)
 
     # Handle both RSS 2.0 and Atom feeds
     channel = root.find("channel")

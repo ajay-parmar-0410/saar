@@ -21,6 +21,13 @@ export async function apiFetch<T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined") {
+      // Stale or invalid session — sign out from Supabase and redirect
+      const { createClient } = await import("@/lib/supabase");
+      await createClient().auth.signOut();
+      window.location.href = "/login";
+      throw new Error("Session expired");
+    }
     const error = await response.json().catch(() => ({ detail: "Request failed" }));
     throw new Error(error.detail || `HTTP ${response.status}`);
   }

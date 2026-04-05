@@ -1,6 +1,6 @@
 """Product Hunt fetcher via RSS."""
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from html import unescape
 
 import httpx

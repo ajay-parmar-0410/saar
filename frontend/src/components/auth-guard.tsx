@@ -36,9 +36,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
         setCheckingOnboarding(false);
       })
-      .catch(() => {
-        // 404 = no prefs at all, needs onboarding
-        router.replace("/onboarding");
+      .catch((err) => {
+        // Only redirect to onboarding on 404 (no preferences exist)
+        // For other errors (network, 401, 500), let the page handle it
+        if (err instanceof Error && err.message.includes("not found")) {
+          router.replace("/onboarding");
+        }
         setCheckingOnboarding(false);
       });
   }, [session?.access_token, user, router, isOnboardingPage]);

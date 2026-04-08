@@ -109,8 +109,8 @@ async def complete_onboarding(
     """Complete onboarding — sets up all user preferences in one call."""
     user_id = user["id"]
 
-    # 1. Update user type
-    update_user(user_id, user_type=body.user_types)
+    # 1. Update user type (include email for upsert in case user row doesn't exist)
+    update_user(user_id, email=user["email"], user_type=body.user_types)
 
     # 2. Determine topics and sources
     # If not provided, use starter pack defaults

@@ -23,6 +23,8 @@ def update_preferences(
 ) -> dict[str, Any]:
     """Update preferences and log changes to preference_history.
 
+    Uses upsert to handle cases where the row doesn't exist yet
+    (e.g., Google OAuth users where the trigger may not have fired).
     Returns the updated preferences.
     """
     client = get_supabase_client()
@@ -34,11 +36,11 @@ def update_preferences(
         _log_preference_changes(user_id, current, fields)
 
     fields["updated_at"] = datetime.now(timezone.utc).isoformat()
+    fields["user_id"] = user_id
 
     result = (
         client.table("user_preferences")
-        .update(fields)
-        .eq("user_id", user_id)
+        .upsert(fields, on_conflict="user_id")
         .execute()
     )
     return result.data[0]

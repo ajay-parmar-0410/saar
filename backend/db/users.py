@@ -14,12 +14,17 @@ def get_user(user_id: str) -> dict[str, Any] | None:
 
 
 def update_user(user_id: str, **fields: Any) -> dict[str, Any]:
-    """Update user fields. Returns the updated user."""
+    """Update user fields. Returns the updated user.
+
+    Uses upsert to handle cases where the row doesn't exist yet
+    (e.g., Google OAuth users where the trigger may not have fired).
+    """
     client = get_supabase_client()
+    fields["id"] = user_id
+
     result = (
         client.table("users")
-        .update(fields)
-        .eq("id", user_id)
+        .upsert(fields, on_conflict="id")
         .execute()
     )
     return result.data[0]

@@ -18,7 +18,11 @@ def get_schedule(user_id: str) -> dict[str, Any] | None:
 
 
 def update_schedule(user_id: str, **fields: Any) -> dict[str, Any]:
-    """Update schedule fields. Returns the updated schedule."""
+    """Update schedule fields. Returns the updated schedule.
+
+    Uses upsert to handle cases where the row doesn't exist yet
+    (e.g., Google OAuth users where the trigger may not have fired).
+    """
     client = get_supabase_client()
 
     # Log schedule changes
@@ -26,10 +30,11 @@ def update_schedule(user_id: str, **fields: Any) -> dict[str, Any]:
     if current:
         _log_schedule_changes(user_id, current, fields)
 
+    fields["user_id"] = user_id
+
     result = (
         client.table("briefing_schedules")
-        .update(fields)
-        .eq("user_id", user_id)
+        .upsert(fields, on_conflict="user_id")
         .execute()
     )
     return result.data[0]

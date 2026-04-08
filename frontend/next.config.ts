@@ -32,7 +32,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co ${apiUrl}; font-src 'self' data:; worker-src 'self';`,
+    value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co ${apiUrl} https://accounts.google.com; font-src 'self' data:; frame-src 'self' https://accounts.google.com; worker-src 'self';`,
   },
   {
     key: "Permissions-Policy",

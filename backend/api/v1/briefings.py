@@ -30,6 +30,12 @@ async def trigger_briefing(
             detail="Complete onboarding first",
         )
 
+    if not prefs.get("sources"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No sources configured — update your preferences in Settings",
+        )
+
     interests_list = get_interests(user["id"])
     interest_names = [i["name"] for i in interests_list]
 
@@ -46,8 +52,8 @@ async def trigger_briefing(
 
     if not result:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Briefing generation failed — check source availability",
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not fetch data from sources — please try again later",
         )
 
     return BriefingDetail(

@@ -19,6 +19,7 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   signInWithMagicLink: (email: string) => Promise<{ error: string | null }>;
+  signInWithGoogle: () => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -70,6 +71,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
+  const signInWithGoogle = useCallback(
+    async () => {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      return { error: error?.message ?? null };
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setState({ user: null, session: null, loading: false });
@@ -77,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ...state, signInWithMagicLink, signOut }}
+      value={{ ...state, signInWithMagicLink, signInWithGoogle, signOut }}
     >
       {children}
     </AuthContext.Provider>

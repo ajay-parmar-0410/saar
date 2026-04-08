@@ -18,25 +18,9 @@ async def fetch_yahoo_finance(
     """
     tickers = symbols or DEFAULT_SYMBOLS
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            "https://query1.finance.yahoo.com/v8/finance/spark",
-            params={
-                "symbols": ",".join(tickers),
-                "range": "1d",
-                "interval": "1d",
-            },
-            headers={"User-Agent": "Saar/1.0"},
-            timeout=5,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-
     items: list[SourceItem] = []
-    for symbol, info in data.get("spark", {}).get("result", [{}])[0:max_items]:
-        pass  # v8 spark returns minimal data
 
-    # Fallback: use v6 quote endpoint for richer data
+    # Use v6 quote endpoint for rich data
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             "https://query1.finance.yahoo.com/v6/finance/quote",

@@ -7,6 +7,8 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === "development",
 });
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const securityHeaders = [
   {
     key: "Strict-Transport-Security",
@@ -30,8 +32,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value:
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co http://localhost:8000; font-src 'self' data:; worker-src 'self';",
+    value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co ${apiUrl}; font-src 'self' data:; worker-src 'self';`,
   },
   {
     key: "Permissions-Policy",

@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { NetworkFirst } from "serwist";
+import { NetworkFirst, NetworkOnly } from "serwist";
 import { Serwist } from "serwist";
 
 declare global {
@@ -12,13 +12,16 @@ declare global {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const self: WorkerGlobalScope & typeof globalThis;
 
-// Filter out default cache rules that might cache API calls,
-// then add a network-first rule for API requests
 const runtimeCaching = [
-  // Always fetch API calls from network
+  // Non-GET requests (POST, PUT, DELETE) always bypass cache entirely
+  {
+    matcher: ({ request }: { request: Request }) => request.method !== "GET",
+    handler: new NetworkOnly(),
+  },
+  // GET API calls use network-first with generous timeout for mobile
   {
     matcher: /\/api\//,
-    handler: new NetworkFirst({ networkTimeoutSeconds: 10 }),
+    handler: new NetworkFirst({ networkTimeoutSeconds: 30 }),
   },
   ...defaultCache,
 ];

@@ -70,7 +70,13 @@ function OnboardingWizard() {
       });
       router.push("/briefing");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const message =
+        err instanceof TypeError && err.message === "Failed to fetch"
+          ? "Network error — check your connection and try again"
+          : err instanceof Error
+            ? err.message
+            : "Something went wrong";
+      setError(message);
       setSubmitting(false);
     }
   };

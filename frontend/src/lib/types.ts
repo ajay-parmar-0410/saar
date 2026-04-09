@@ -1,11 +1,19 @@
 // ---- Briefing ----
 
+export interface EngagementData {
+  type: "stars" | "points" | "upvotes" | "model" | "price_change" | "temperature";
+  value?: number;
+  downloads?: number;
+  likes?: number;
+}
+
 export interface BriefingItem {
   title: string;
   summary: string;
   url: string;
   source: string;
   impact: "HIGH" | "MEDIUM" | "LOW";
+  engagement?: EngagementData | null;
 }
 
 export interface BriefingSection {

@@ -52,6 +52,59 @@ class Briefing:
     sections_json: list[dict[str, Any]]
 
 
+def _extract_engagement(item: SummarizedItem) -> dict[str, Any] | None:
+    """Extract source-specific engagement metrics for frontend display."""
+    raw = item.raw
+    if not raw:
+        return None
+
+    source = item.source
+
+    if source == "github":
+        stars = raw.get("stars") or raw.get("stargazers_count")
+        if stars is not None:
+            return {"type": "stars", "value": stars}
+
+    if source == "hackernews":
+        score = raw.get("score") or raw.get("points")
+        if score is not None:
+            return {"type": "points", "value": score}
+
+    if source in ("reddit", "reddit_trending", "reddit_finance"):
+        ups = raw.get("ups")
+        if ups is not None:
+            return {"type": "upvotes", "value": ups}
+
+    if source == "producthunt":
+        votes = raw.get("votes_count") or raw.get("upvotes")
+        if votes is not None:
+            return {"type": "upvotes", "value": votes}
+
+    if source == "huggingface":
+        downloads = raw.get("downloads")
+        likes = raw.get("likes")
+        if downloads is not None or likes is not None:
+            result: dict[str, Any] = {"type": "model"}
+            if downloads is not None:
+                result["downloads"] = downloads
+            if likes is not None:
+                result["likes"] = likes
+            return result
+
+    if source == "yahoo_finance":
+        change_pct = raw.get("change_pct")
+        if change_pct is not None:
+            return {"type": "price_change", "value": change_pct}
+
+    if source == "weatherapi":
+        current = raw.get("current", {})
+        temp = current.get("temp_c") if isinstance(current, dict) else None
+        if temp is not None:
+            return {"type": "temperature", "value": temp}
+
+    return None
+
+
 def _classify_item(
     item: SummarizedItem,
     section_configs: list[dict[str, Any]],
@@ -170,6 +223,7 @@ def _sections_to_json(
                     "source": item.source,
                     "impact": item.impact,
                     "relevance": item.relevance,
+                    "engagement": _extract_engagement(item),
                 }
                 for item in section.items
             ],

@@ -2,7 +2,7 @@
 
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
@@ -29,6 +29,7 @@ class SummarizedItem:
     source: str
     impact: str
     relevance: int
+    raw: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -268,6 +269,7 @@ async def summarize_items(
             source=item.source,
             impact=item.raw.get("impact", "MEDIUM"),
             relevance=item.raw.get("relevance", 0),
+            raw=item.raw,
         )
         for i, item in enumerate(remaining)
     ]

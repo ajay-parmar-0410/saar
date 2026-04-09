@@ -1,5 +1,5 @@
 import type { BriefingItem } from "@/lib/types";
-import { ImpactBadge } from "./impact-badge";
+import { EngagementBadge } from "./engagement-badge";
 import { getSourceDisplay, formatTimeAgo } from "@/lib/source-utils";
 
 interface BriefingCardProps {
@@ -20,7 +20,7 @@ export function BriefingCard({ item, featured = false, generatedAt }: BriefingCa
         featured ? "p-5" : "p-4"
       }`}
     >
-      <ImpactBadge impact={item.impact} />
+      <EngagementBadge engagement={item.engagement} source={item.source} />
 
       <h3
         className={`mt-2 font-semibold leading-snug text-foreground break-words ${

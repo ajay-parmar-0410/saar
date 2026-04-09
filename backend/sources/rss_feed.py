@@ -11,7 +11,7 @@ from sources.types import SourceItem, SourceResult
 
 # Predefined RSS feeds
 RSS_FEEDS: dict[str, str] = {
-    "moneycontrol": "https://www.moneycontrol.com/rss/MCtopnews.xml",
+    "moneycontrol": "https://www.livemint.com/rss/news",
     "economic_times": "https://economictimes.indiatimes.com/rssfeedstopstories.cms",
     "techcrunch": "https://techcrunch.com/feed/",
 }
@@ -28,10 +28,17 @@ async def fetch_rss(
         return SourceResult(source_name=feed_name, error=f"Unknown RSS feed: {feed_name}")
 
     async with httpx.AsyncClient() as client:
-        resp = await client.get(url, timeout=5, follow_redirects=True)
+        resp = await client.get(
+            url,
+            timeout=10,
+            follow_redirects=True,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; Saar/1.0)"},
+        )
         resp.raise_for_status()
 
-    root = SafeET.fromstring(resp.text)
+    # Some feeds use non-UTF-8 encoding (e.g. ISO-8859-1); decode safely
+    content = resp.text
+    root = SafeET.fromstring(content)
 
     # Handle both RSS 2.0 and Atom feeds
     channel = root.find("channel")

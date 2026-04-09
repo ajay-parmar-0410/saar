@@ -36,13 +36,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
         setCheckingOnboarding(false);
       })
-      .catch((err) => {
-        // Only redirect to onboarding on 404 (no preferences exist)
-        // For other errors (network, 401, 500), let the page handle it
-        if (err instanceof Error && err.message.includes("not found")) {
-          router.replace("/onboarding");
-        }
-        setCheckingOnboarding(false);
+      .catch(() => {
+        // Any failure to load preferences means the user needs onboarding.
+        // 404 = no prefs row, network error = can't verify, 500 = backend issue.
+        // (401 is already handled by apiFetch which redirects to /login.)
+        // Onboarding uses upsert, so existing users won't lose data.
+        router.replace("/onboarding");
       });
   }, [session?.access_token, user, router, isOnboardingPage]);
 

@@ -42,6 +42,9 @@ def update_last_active(user_id: str) -> None:
 
 
 def delete_user(user_id: str) -> None:
-    """Delete a user and all associated data (cascade)."""
+    """Delete a user and all associated data (cascade), including the Supabase Auth user."""
     client = get_supabase_client()
+    # Delete app data first (cascade handles related tables)
     client.table("users").delete().eq("id", user_id).execute()
+    # Delete the Supabase Auth user so they can't log in again
+    client.auth.admin.delete_user(user_id)

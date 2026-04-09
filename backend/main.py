@@ -81,3 +81,40 @@ app.include_router(chat_router)
 @app.get("/health")
 async def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/health/sources")
+async def source_health_check() -> dict:
+    """Test all source fetchers and report status. For diagnostics only."""
+    import time
+    from sources.registry import SOURCE_REGISTRY
+    from sources.types import SourceResult
+
+    results = {}
+    for name, (fn, kwargs) in SOURCE_REGISTRY.items():
+        start = time.time()
+        try:
+            if name == "weatherapi":
+                kwargs = {**kwargs, "location": "Mumbai"}
+            elif name in ("reddit", "reddit_trending", "reddit_finance"):
+                kwargs = {**kwargs, "user_type": "general"}
+
+            result: SourceResult = await fn(**kwargs)
+            elapsed = round(time.time() - start, 2)
+
+            if result.error:
+                results[name] = {"status": "error", "error": result.error, "time": elapsed}
+            else:
+                results[name] = {
+                    "status": "ok",
+                    "items": len(result.items),
+                    "sample": result.items[0].title[:60] if result.items else "",
+                    "time": elapsed,
+                }
+        except Exception as e:
+            elapsed = round(time.time() - start, 2)
+            results[name] = {"status": "exception", "error": str(e)[:100], "time": elapsed}
+
+    ok = sum(1 for r in results.values() if r["status"] == "ok" and r.get("items", 0) > 0)
+    total = len(results)
+    return {"ok": ok, "total": total, "sources": results}

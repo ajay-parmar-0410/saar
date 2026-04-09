@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// API calls use relative URLs — Next.js rewrites proxy them to the backend.
+// This avoids CORS, CSP, and mobile network issues with cross-origin requests.
 
 export async function apiFetch<T>(
   path: string,
@@ -15,7 +16,7 @@ export async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(path, {
     headers,
     ...rest,
   });

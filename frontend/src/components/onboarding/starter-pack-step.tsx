@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/auth-context";
-import { apiFetch } from "@/lib/api";
 
 interface StarterPackStepProps {
   userTypes: string[];
@@ -60,30 +57,7 @@ export function StarterPackStep({
   onNext,
   onBack,
 }: StarterPackStepProps) {
-  const { session } = useAuth();
-  const [loading, setLoading] = useState(false);
-
-  // Fetch starter pack defaults on mount (only if nothing selected yet)
-  useEffect(() => {
-    if (topics.length > 0 && sources.length > 0) return;
-
-    const fetchPack = async () => {
-      if (!session?.access_token) return;
-      setLoading(true);
-      try {
-        const data = await apiFetch<{ topics: string[]; sources: string[] }>(
-          `/api/v1/onboarding/starter-pack?user_types=${userTypes.join(",")}`,
-          { token: session.access_token }
-        );
-        onUpdate(data.topics, data.sources);
-      } catch {
-        // Fallback — user will manually select
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPack();
-  }, [userTypes.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  // No pre-selection — user picks their own topics and sources from scratch
 
   const toggleTopic = (topic: string) => {
     const updated = topics.includes(topic)
@@ -98,14 +72,6 @@ export function StarterPackStep({
       : [...sources, source];
     onUpdate(topics, updated);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

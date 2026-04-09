@@ -7,7 +7,7 @@ import { BriefingCard } from "@/components/briefing/briefing-card";
 import { BriefingSkeleton } from "@/components/briefing/briefing-skeleton";
 import { TopStoryCard } from "@/components/briefing/top-story-card";
 import { SectionPills } from "@/components/briefing/section-pills";
-import { RefreshCw, Sun } from "lucide-react";
+import { RefreshCw, Sparkles, Sun } from "lucide-react";
 import Link from "next/link";
 
 interface BriefingListResponse {
@@ -163,18 +163,28 @@ export default function BriefingPage() {
         />
       </div>
 
-      {/* Date + refresh */}
+      {/* Date + generate + refresh */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">{today}</p>
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
-        >
-          <RefreshCw
-            className={`size-3.5 ${refreshing ? "animate-spin" : ""}`}
-          />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            <Sparkles className={`size-3.5 ${generating ? "animate-spin" : ""}`} />
+            {generating ? "Generating..." : "Generate"}
+          </button>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
+          >
+            <RefreshCw
+              className={`size-3.5 ${refreshing ? "animate-spin" : ""}`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Top Story */}

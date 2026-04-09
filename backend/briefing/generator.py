@@ -10,24 +10,17 @@ from briefing.summarizer import SummaryResult, SummarizedItem, TopStory
 
 logger = logging.getLogger(__name__)
 
-# Section definitions per user type
-SECTION_CONFIG: dict[str, list[dict[str, Any]]] = {
-    "ai_tech": [
-        {"key": "ai_tech", "title": "AI & Tech", "sources": {"github", "hackernews", "techcrunch", "producthunt", "huggingface"}, "topics": {"artificial_intelligence", "machine_learning", "llm", "developer_tools", "startups"}},
-        {"key": "research", "title": "Research", "sources": {"arxiv"}, "topics": {"research_papers"}},
-        {"key": "community", "title": "Community Buzz", "sources": {"reddit"}, "topics": {"open_source"}},
-    ],
-    "trader": [
-        {"key": "markets", "title": "Markets", "sources": {"yahoo_finance", "moneycontrol"}, "topics": {"indian_markets", "nifty", "sensex"}},
-        {"key": "watchlist", "title": "Watchlist", "sources": set(), "topics": {"ipo", "earnings"}},
-        {"key": "economy", "title": "Economic News", "sources": {"economic_times", "exchangerate"}, "topics": {"economy", "gold", "currency"}},
-    ],
-    "general": [
-        {"key": "headlines", "title": "Headlines", "sources": {"newsapi", "google_news"}, "topics": {"top_headlines", "world_news"}},
-        {"key": "weather", "title": "Weather", "sources": {"weatherapi"}, "topics": {"weather"}},
-        {"key": "trending", "title": "Trending", "sources": {"reddit_trending"}, "topics": {"trending"}},
-    ],
-}
+# Universal section definitions — every section is available regardless of user type.
+# Items are classified by their source; empty sections are skipped in output.
+ALL_SECTIONS: list[dict[str, Any]] = [
+    {"key": "headlines", "title": "Headlines", "sources": {"newsapi", "google_news"}},
+    {"key": "tech", "title": "Tech", "sources": {"github", "hackernews", "techcrunch", "producthunt", "huggingface"}},
+    {"key": "markets", "title": "Markets", "sources": {"yahoo_finance", "moneycontrol"}},
+    {"key": "research", "title": "Research", "sources": {"arxiv"}},
+    {"key": "economy", "title": "Economy", "sources": {"economic_times", "exchangerate"}},
+    {"key": "trending", "title": "Trending", "sources": {"reddit", "reddit_trending", "reddit_finance"}},
+    {"key": "weather", "title": "Weather", "sources": {"weatherapi"}},
+]
 
 
 @dataclass(frozen=True)
@@ -121,39 +114,31 @@ def _organize_into_sections(
     items: list[SummarizedItem],
     user_types: list[str],
 ) -> list[BriefingSection]:
-    """Group items into named sections based on user type configuration."""
-    # Merge section configs for all user types
-    all_configs: list[dict[str, Any]] = []
-    seen_keys: set[str] = set()
+    """Group items into named sections based on source matching.
 
-    for user_type in user_types:
-        configs = SECTION_CONFIG.get(user_type, SECTION_CONFIG["general"])
-        for config in configs:
-            if config["key"] not in seen_keys:
-                all_configs.append(config)
-                seen_keys.add(config["key"])
-
+    All sections are universal — user_types is accepted for API compatibility
+    but no longer gates which sections appear. Empty sections are skipped.
+    """
     # Classify items into sections
     section_items: dict[str, list[SummarizedItem]] = {
-        config["key"]: [] for config in all_configs
+        config["key"]: [] for config in ALL_SECTIONS
     }
     uncategorized: list[SummarizedItem] = []
 
     for item in items:
-        section_key = _classify_item(item, all_configs)
+        section_key = _classify_item(item, ALL_SECTIONS)
         if section_key and section_key in section_items:
             section_items[section_key].append(item)
         else:
             uncategorized.append(item)
 
-    # Distribute uncategorized items to first section
-    if uncategorized and all_configs:
-        first_key = all_configs[0]["key"]
-        section_items[first_key].extend(uncategorized)
+    # Distribute uncategorized items to headlines
+    if uncategorized:
+        section_items["headlines"].extend(uncategorized)
 
     # Build sections (skip empty ones)
     sections: list[BriefingSection] = []
-    for config in all_configs:
+    for config in ALL_SECTIONS:
         items_in_section = section_items[config["key"]]
         if items_in_section:
             sections.append(BriefingSection(

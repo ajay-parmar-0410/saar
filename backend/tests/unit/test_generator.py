@@ -42,7 +42,7 @@ def _make_top_story(title: str = "Breaking news") -> TopStory:
 
 
 class TestOrganizeIntoSections:
-    def test_ai_tech_user(self):
+    def test_tech_sources(self):
         items = [
             _make_summarized_item("GitHub update", source="github"),
             _make_summarized_item("New paper on arxiv", source="arxiv"),
@@ -50,9 +50,9 @@ class TestOrganizeIntoSections:
         ]
         sections = _organize_into_sections(items, ["ai_tech"])
         keys = [s.key for s in sections]
-        assert "ai_tech" in keys
+        assert "tech" in keys
         assert "research" in keys
-        assert "community" in keys
+        assert "trending" in keys
 
     def test_trader_user(self):
         items = [
@@ -80,7 +80,7 @@ class TestOrganizeIntoSections:
         ]
         sections = _organize_into_sections(items, ["ai_tech", "trader"])
         keys = [s.key for s in sections]
-        assert "ai_tech" in keys
+        assert "tech" in keys
         assert "markets" in keys
 
     def test_empty_sections_skipped(self):
@@ -89,11 +89,12 @@ class TestOrganizeIntoSections:
         # Only the section with items should appear
         assert all(len(s.items) > 0 for s in sections)
 
-    def test_uncategorized_goes_to_first_section(self):
+    def test_uncategorized_goes_to_headlines(self):
         items = [_make_summarized_item("Random item", source="unknown_source")]
         sections = _organize_into_sections(items, ["general"])
-        # Should land in first section
+        # Should land in headlines section
         assert len(sections) == 1
+        assert sections[0].key == "headlines"
         assert len(sections[0].items) == 1
 
 

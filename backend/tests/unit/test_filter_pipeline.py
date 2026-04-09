@@ -36,7 +36,7 @@ def _mock_llm_scores(items_count: int, relevance: int = 8, impact: str = "HIGH")
 class TestPipelineConfig:
     def test_default_detailed_limit(self):
         config = PipelineConfig()
-        assert config.item_limit == 18
+        assert config.item_limit == 25
 
     def test_headlines_limit(self):
         config = PipelineConfig(mode="headlines")

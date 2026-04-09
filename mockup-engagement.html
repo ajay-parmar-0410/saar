@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate Button Placement — Mockup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-50 max-w-md mx-auto relative min-h-screen">
+
+  <!-- ============================================ -->
+  <!-- OPTION A: Generate button in header row      -->
+  <!-- ============================================ -->
+  <div class="p-4 pb-0">
+    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6">Option A — Button in header row</h2>
+  </div>
+
+  <div class="px-4">
+    <!-- Section pills -->
+    <div class="scrollbar-hide flex gap-2 overflow-x-auto pb-1 mb-3">
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-sky-500 text-white">All</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Headlines</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Tech</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Markets</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Research</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Weather</button>
+    </div>
+
+    <!-- Date row with refresh + GENERATE button -->
+    <div class="mb-4 flex items-center justify-between">
+      <p class="text-xs text-slate-400">Wednesday, April 9, 2026</p>
+      <div class="flex items-center gap-1.5">
+        <!-- Generate button — sky accent, matches app theme -->
+        <button class="flex items-center gap-1.5 rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-600 transition-colors">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+          Generate
+        </button>
+        <!-- Refresh button -->
+        <button class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100">
+          <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sample cards -->
+    <div class="block rounded-xl border border-slate-100 bg-white p-4 mb-3">
+      <div class="flex items-center gap-1.5">
+        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          <svg class="h-3 w-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          31.7k
+        </span>
+      </div>
+      <h3 class="mt-2 text-sm font-semibold leading-snug text-slate-900">mempalace — Build AI memory palaces for learning</h3>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">An open-source tool that uses spatial memory techniques combined with AI to help you retain complex information...</p>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span class="inline-block h-2 w-2 rounded-full bg-purple-600"></span>
+        <span class="font-semibold text-slate-500">GitHub</span>
+        <span>&bull;</span>
+        <span>2h ago</span>
+      </div>
+    </div>
+
+    <div class="block rounded-xl border border-slate-100 bg-white p-4 mb-3">
+      <div class="flex items-center gap-1.5">
+        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          <svg class="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 01.894.553l2.382 4.789 5.317.775a1 1 0 01.553 1.705l-3.847 3.748.908 5.295a1 1 0 01-1.45 1.054L10 17.347l-4.757 2.477a1 1 0 01-1.45-1.054l.908-5.295-3.847-3.748a1 1 0 01.553-1.705l5.317-.775L9.106 2.553A1 1 0 0110 2z" clip-rule="evenodd"/></svg>
+          842 pts
+        </span>
+      </div>
+      <h3 class="mt-2 text-sm font-semibold leading-snug text-slate-900">Git commands I run before reading any code</h3>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">A practical guide to the essential git commands developers should run to understand a codebase before diving in...</p>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span class="inline-block h-2 w-2 rounded-full bg-orange-500"></span>
+        <span class="font-semibold text-slate-500">Hacker News</span>
+        <span>&bull;</span>
+        <span>5h ago</span>
+      </div>
+    </div>
+
+    <div class="block rounded-xl border border-slate-100 bg-white p-4 mb-3">
+      <h3 class="mt-0 text-sm font-semibold leading-snug text-slate-900">India Triumphs at Asian Youth Table Tennis Championship</h3>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">India's youth table tennis team secured a historic win at the championship, marking a new milestone for the sport in the country...</p>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span class="inline-block h-2 w-2 rounded-full bg-slate-500"></span>
+        <span class="font-semibold text-slate-500">News</span>
+        <span>&bull;</span>
+        <span>45m ago</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divider between options -->
+  <div class="mx-4 my-8 border-t-2 border-dashed border-slate-300"></div>
+
+  <!-- ============================================ -->
+  <!-- OPTION B: Floating Action Button (FAB)       -->
+  <!-- ============================================ -->
+  <div class="p-4 pb-0">
+    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6">Option B — Floating Action Button (FAB)</h2>
+  </div>
+
+  <div class="px-4 pb-24 relative">
+    <!-- Section pills -->
+    <div class="scrollbar-hide flex gap-2 overflow-x-auto pb-1 mb-3">
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-sky-500 text-white">All</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Headlines</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Tech</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Markets</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Research</button>
+      <button class="min-h-[36px] whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold bg-slate-100 text-slate-500">Weather</button>
+    </div>
+
+    <!-- Date row with just refresh (no generate here) -->
+    <div class="mb-4 flex items-center justify-between">
+      <p class="text-xs text-slate-400">Wednesday, April 9, 2026</p>
+      <button class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/></svg>
+      </button>
+    </div>
+
+    <!-- Sample cards -->
+    <div class="block rounded-xl border border-slate-100 bg-white p-4 mb-3">
+      <div class="flex items-center gap-1.5">
+        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          <svg class="h-3 w-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          31.7k
+        </span>
+      </div>
+      <h3 class="mt-2 text-sm font-semibold leading-snug text-slate-900">mempalace — Build AI memory palaces for learning</h3>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">An open-source tool that uses spatial memory techniques combined with AI to help you retain complex information...</p>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span class="inline-block h-2 w-2 rounded-full bg-purple-600"></span>
+        <span class="font-semibold text-slate-500">GitHub</span>
+        <span>&bull;</span>
+        <span>2h ago</span>
+      </div>
+    </div>
+
+    <div class="block rounded-xl border border-slate-100 bg-white p-4 mb-3">
+      <div class="flex items-center gap-1.5">
+        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          <svg class="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 01.894.553l2.382 4.789 5.317.775a1 1 0 01.553 1.705l-3.847 3.748.908 5.295a1 1 0 01-1.45 1.054L10 17.347l-4.757 2.477a1 1 0 01-1.45-1.054l.908-5.295-3.847-3.748a1 1 0 01.553-1.705l5.317-.775L9.106 2.553A1 1 0 0110 2z" clip-rule="evenodd"/></svg>
+          842 pts
+        </span>
+      </div>
+      <h3 class="mt-2 text-sm font-semibold leading-snug text-slate-900">Git commands I run before reading any code</h3>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">A practical guide to the essential git commands developers should run to understand a codebase before diving in...</p>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span class="inline-block h-2 w-2 rounded-full bg-orange-500"></span>
+        <span class="font-semibold text-slate-500">Hacker News</span>
+        <span>&bull;</span>
+        <span>5h ago</span>
+      </div>
+    </div>
+
+    <div class="block rounded-xl border border-slate-100 bg-white p-4 mb-3">
+      <h3 class="mt-0 text-sm font-semibold leading-snug text-slate-900">India Triumphs at Asian Youth Table Tennis Championship</h3>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">India's youth table tennis team secured a historic win at the championship, marking a new milestone for the sport in the country...</p>
+      <div class="mt-3 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span class="inline-block h-2 w-2 rounded-full bg-slate-500"></span>
+        <span class="font-semibold text-slate-500">News</span>
+        <span>&bull;</span>
+        <span>45m ago</span>
+      </div>
+    </div>
+
+    <!-- FAB — fixed to bottom-right, above bottom nav -->
+    <div class="fixed bottom-20 right-4 z-50">
+      <button class="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-500/30 hover:bg-sky-600 transition-colors">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+      </button>
+    </div>
+
+    <!-- Fake bottom nav for context -->
+    <div class="fixed bottom-0 left-0 right-0 flex justify-around border-t border-slate-200 bg-white py-2 max-w-md mx-auto">
+      <div class="flex flex-col items-center gap-0.5 text-sky-500">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5"/></svg>
+        <span class="text-[10px] font-medium">Briefing</span>
+      </div>
+      <div class="flex flex-col items-center gap-0.5 text-slate-400">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+        <span class="text-[10px] font-medium">Chat</span>
+      </div>
+      <div class="flex flex-col items-center gap-0.5 text-slate-400">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="text-[10px] font-medium">History</span>
+      </div>
+      <div class="flex flex-col items-center gap-0.5 text-slate-400">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="text-[10px] font-medium">Settings</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

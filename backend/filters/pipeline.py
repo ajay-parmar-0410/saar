@@ -1,6 +1,7 @@
 """Filter pipeline orchestrator — chains all filters in sequence."""
 
 import logging
+from collections import defaultdict
 from dataclasses import dataclass
 
 from sources.types import SourceItem
@@ -14,8 +15,39 @@ logger = logging.getLogger(__name__)
 IMPACT_ORDER = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
 
 # Default item limits
-DETAILED_LIMIT = 18
+DETAILED_LIMIT = 25
 HEADLINES_LIMIT = 10
+
+# Source-to-category mapping for diversity guarantees
+SOURCE_CATEGORY: dict[str, str] = {
+    "github": "tech",
+    "hackernews": "tech",
+    "producthunt": "tech",
+    "techcrunch": "tech",
+    "huggingface": "tech",
+    "arxiv": "research",
+    "newsapi": "news",
+    "google_news": "news",
+    "reddit": "trending",
+    "reddit_trending": "trending",
+    "reddit_finance": "markets",
+    "yahoo_finance": "markets",
+    "moneycontrol": "markets",
+    "economic_times": "economy",
+    "exchangerate": "economy",
+    "weatherapi": "weather",
+}
+
+# Fill priority after guaranteed slots (higher = filled first)
+CATEGORY_PRIORITY: dict[str, int] = {
+    "news": 7,
+    "tech": 6,
+    "markets": 5,
+    "research": 4,
+    "economy": 3,
+    "trending": 2,
+    "weather": 1,
+}
 
 
 @dataclass(frozen=True)
@@ -49,6 +81,56 @@ def _sort_by_impact(items: list[SourceItem]) -> list[SourceItem]:
             -item.raw.get("relevance", 0),
         ),
     )
+
+
+def _diverse_limit(items: list[SourceItem], limit: int) -> list[SourceItem]:
+    """Limit items while guaranteeing at least 1 top item per active source category.
+
+    Strategy:
+    1. Group items by category, pick the best item from each (guaranteed slots).
+    2. Fill remaining slots by category priority order (news > tech > markets > ...).
+    """
+    if len(items) <= limit:
+        return items
+
+    # Group by category
+    by_category: dict[str, list[SourceItem]] = defaultdict(list)
+    for item in items:
+        cat = SOURCE_CATEGORY.get(item.source, "news")
+        by_category[cat].append(item)
+
+    # Phase 1: guarantee 1 best item per active category
+    reserved: list[SourceItem] = []
+    remaining_by_cat: dict[str, list[SourceItem]] = {}
+    for cat, cat_items in by_category.items():
+        reserved.append(cat_items[0])  # already sorted by impact+relevance
+        remaining_by_cat[cat] = cat_items[1:]
+
+    # If guaranteed slots already exceed limit, trim lowest-priority categories
+    if len(reserved) > limit:
+        reserved.sort(
+            key=lambda item: (
+                -CATEGORY_PRIORITY.get(SOURCE_CATEGORY.get(item.source, "news"), 0),
+                IMPACT_ORDER.get(item.raw.get("impact", "MEDIUM"), 1),
+            ),
+        )
+        return reserved[:limit]
+
+    # Phase 2: fill remaining slots from leftover items, ordered by category priority
+    slots_left = limit - len(reserved)
+    reserved_set = set(id(item) for item in reserved)
+
+    # Build priority-ordered pool of remaining items
+    fill_pool: list[SourceItem] = []
+    cats_by_priority = sorted(
+        remaining_by_cat.keys(),
+        key=lambda c: -CATEGORY_PRIORITY.get(c, 0),
+    )
+    for cat in cats_by_priority:
+        fill_pool.extend(remaining_by_cat[cat])
+
+    fill = fill_pool[:slots_left]
+    return reserved + fill
 
 
 async def run_filter_pipeline(
@@ -91,8 +173,8 @@ async def run_filter_pipeline(
     # Stage 4: Sort by impact then relevance
     sorted_items = _sort_by_impact(scored)
 
-    # Stage 5: Limit
-    limited = sorted_items[:config.item_limit]
+    # Stage 5: Diversity-aware limit (guarantees 1 item per source category)
+    limited = _diverse_limit(sorted_items, config.item_limit)
 
     stats = {
         "input": initial_count,

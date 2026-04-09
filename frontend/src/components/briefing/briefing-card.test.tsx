@@ -18,9 +18,9 @@ describe("BriefingCard", () => {
     expect(screen.getByText("Major AI breakthrough announced today.")).toBeInTheDocument();
   });
 
-  it("renders source name", () => {
+  it("renders friendly source name with dot", () => {
     render(<BriefingCard item={mockItem} />);
-    expect(screen.getByText("newsapi")).toBeInTheDocument();
+    expect(screen.getByText("News")).toBeInTheDocument();
   });
 
   it("renders impact badge", () => {

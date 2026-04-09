@@ -15,7 +15,7 @@ describe("BriefingSkeleton", () => {
 
   it("renders skeleton cards", () => {
     const { container } = render(<BriefingSkeleton />);
-    const cards = container.querySelectorAll(".rounded-lg.border");
+    const cards = container.querySelectorAll(".rounded-xl.border");
     expect(cards.length).toBeGreaterThan(0);
   });
 });

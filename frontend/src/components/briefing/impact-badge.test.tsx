@@ -21,18 +21,21 @@ describe("ImpactBadge", () => {
   it("applies HIGH styles", () => {
     render(<ImpactBadge impact="HIGH" />);
     const badge = screen.getByText("HIGH");
-    expect(badge.className).toContain("destructive");
+    expect(badge.className).toContain("bg-red-50");
+    expect(badge.className).toContain("text-red-600");
   });
 
   it("applies MEDIUM styles", () => {
     render(<ImpactBadge impact="MEDIUM" />);
     const badge = screen.getByText("MEDIUM");
-    expect(badge.className).toContain("yellow");
+    expect(badge.className).toContain("bg-amber-50");
+    expect(badge.className).toContain("text-amber-600");
   });
 
   it("applies LOW styles", () => {
     render(<ImpactBadge impact="LOW" />);
     const badge = screen.getByText("LOW");
-    expect(badge.className).toContain("muted");
+    expect(badge.className).toContain("bg-green-50");
+    expect(badge.className).toContain("text-green-600");
   });
 });

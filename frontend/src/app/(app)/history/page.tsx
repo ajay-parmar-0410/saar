@@ -6,6 +6,7 @@ import { useAuth } from "@/context/auth-context";
 import { apiFetch } from "@/lib/api";
 import type { Briefing, BriefingItem } from "@/lib/types";
 import { BriefingCard } from "@/components/briefing/briefing-card";
+import { TopStoryCard } from "@/components/briefing/top-story-card";
 import { Clock, ChevronDown, Loader2, Inbox } from "lucide-react";
 
 interface BriefingSummaryItem {
@@ -177,16 +178,25 @@ export default function HistoryPage() {
                   ) : expandedBriefing ? (
                     <>
                       {expandedBriefing.top_story && typeof expandedBriefing.top_story === "string" && (
-                        <div className="rounded-lg border border-border bg-card p-4">
-                          <p className="text-sm font-medium">{expandedBriefing.top_story}</p>
-                        </div>
+                        <TopStoryCard
+                          topStory={expandedBriefing.top_story}
+                          generatedAt={expandedBriefing.created_at}
+                        />
                       )}
                       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {expandedBriefing.sections.map((section: any) => {
+                        const sectionTitle = (section.title || section.name || section.key || "Section") as string;
                         const items = (section.items || []) as BriefingItem[];
-                        return items.map((si) => (
-                          <BriefingCard key={si.title} item={si} />
-                        ));
+                        return (
+                          <div key={sectionTitle}>
+                            <h3 className="mb-2 mt-3 text-sm font-bold text-muted-foreground">{sectionTitle}</h3>
+                            {items.map((si) => (
+                              <div key={si.title} className="mb-2">
+                                <BriefingCard item={si} generatedAt={expandedBriefing.created_at} />
+                              </div>
+                            ))}
+                          </div>
+                        );
                       })}
                     </>
                   ) : (

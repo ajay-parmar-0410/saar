@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useApi, useApiMutation } from "@/hooks/use-api";
 import type { Briefing, BriefingItem } from "@/lib/types";
 import { BriefingCard } from "@/components/briefing/briefing-card";
 import { BriefingSkeleton } from "@/components/briefing/briefing-skeleton";
-import { RefreshCw } from "lucide-react";
+import { TopStoryCard } from "@/components/briefing/top-story-card";
+import { SectionPills } from "@/components/briefing/section-pills";
+import { RefreshCw, Sun } from "lucide-react";
 import Link from "next/link";
 
 interface BriefingListResponse {
@@ -29,6 +31,7 @@ export default function BriefingPage() {
   const error = listError || detailError;
 
   const [refreshing, setRefreshing] = useState(false);
+  const [activeSection, setActiveSection] = useState("All");
   const touchStartY = useRef(0);
   const { mutate: generateBriefing, loading: generating } = useApiMutation<void, Briefing>(
     "/api/v1/briefings/generate",
@@ -67,6 +70,27 @@ export default function BriefingPage() {
     [handleRefresh]
   );
 
+  // Build section names for pills
+  const sectionNames = useMemo(() => {
+    if (!briefing?.sections) return ["All"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const names = briefing.sections.map((s: any) =>
+      (s.title || s.name || s.key || "Section") as string
+    );
+    return ["All", ...names];
+  }, [briefing?.sections]);
+
+  // Filter sections based on active pill
+  const filteredSections = useMemo(() => {
+    if (!briefing?.sections) return [];
+    if (activeSection === "All") return briefing.sections;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return briefing.sections.filter((s: any) => {
+      const name = (s.title || s.name || s.key || "Section") as string;
+      return name === activeSection;
+    });
+  }, [briefing?.sections, activeSection]);
+
   const today = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
     year: "numeric",
@@ -74,11 +98,20 @@ export default function BriefingPage() {
     day: "numeric",
   });
 
+  // Briefing generated timestamp
+  const generatedAt = briefing?.created_at ?? undefined;
+
   if (loading && !refreshing) {
     return (
       <div>
-        <h1 className="mb-1 text-lg font-bold">Today&apos;s Briefing</h1>
-        <p className="mb-6 text-xs text-muted-foreground">{today}</p>
+        <div className="mb-4">
+          <div className="flex gap-2">
+            {["All", "Loading..."].map((p) => (
+              <div key={p} className="h-9 w-20 animate-pulse rounded-full bg-muted" />
+            ))}
+          </div>
+        </div>
+        <p className="mb-4 text-xs text-muted-foreground">{today}</p>
         <BriefingSkeleton />
       </div>
     );
@@ -102,18 +135,16 @@ export default function BriefingPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <RefreshCw className="size-7 text-muted-foreground" />
+          <Sun className="size-7 text-muted-foreground" />
         </div>
-        <h2 className="text-lg font-semibold">
-          No briefing yet
-        </h2>
+        <h2 className="text-lg font-semibold">No briefing yet</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Generate your first briefing now, or wait for your scheduled time.
         </p>
         <button
           onClick={handleGenerate}
           disabled={generating}
-          className="mt-4 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="mt-6 rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
           {generating ? "Generating..." : "Generate Now"}
         </button>
@@ -123,54 +154,51 @@ export default function BriefingPage() {
 
   return (
     <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      {/* Header */}
-      <div className="mb-1 flex items-center justify-between">
-        <h1 className="text-lg font-bold">Today&apos;s Briefing</h1>
+      {/* Section filter pills */}
+      <div className="mb-3">
+        <SectionPills
+          sections={sectionNames}
+          activeSection={activeSection}
+          onSelect={setActiveSection}
+        />
+      </div>
+
+      {/* Date + refresh */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">{today}</p>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="rounded-md p-2 text-muted-foreground hover:bg-muted"
+          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
         >
           <RefreshCw
-            className={`size-4 ${refreshing ? "animate-spin" : ""}`}
+            className={`size-3.5 ${refreshing ? "animate-spin" : ""}`}
           />
         </button>
       </div>
-      <p className="mb-6 text-xs text-muted-foreground">{today}</p>
 
       {/* Top Story */}
-      {briefing.top_story && typeof briefing.top_story === "string" && (
+      {activeSection === "All" && briefing.top_story && (
         <div className="mb-6">
-          <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-            Top Story
-          </h2>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm">{briefing.top_story}</p>
-          </div>
-        </div>
-      )}
-      {briefing.top_story && typeof briefing.top_story === "object" && (
-        <div className="mb-6">
-          <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-            Top Story
-          </h2>
-          <BriefingCard item={briefing.top_story} featured />
+          {typeof briefing.top_story === "string" ? (
+            <TopStoryCard topStory={briefing.top_story} generatedAt={generatedAt} />
+          ) : (
+            <BriefingCard item={briefing.top_story} featured generatedAt={generatedAt} />
+          )}
         </div>
       )}
 
       {/* Sections */}
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {briefing.sections.map((section: any) => {
+      {filteredSections.map((section: any) => {
         const sectionName = (section.title || section.name || section.key || "Section") as string;
         const items = (section.items || []) as BriefingItem[];
         return (
           <div key={sectionName} className="mb-6">
-            <h2 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-              {sectionName}
-            </h2>
+            <h2 className="mb-3 text-base font-bold">{sectionName}</h2>
             <div className="space-y-2">
               {items.map((item) => (
-                <BriefingCard key={item.title} item={item} />
+                <BriefingCard key={item.title} item={item} generatedAt={generatedAt} />
               ))}
             </div>
           </div>

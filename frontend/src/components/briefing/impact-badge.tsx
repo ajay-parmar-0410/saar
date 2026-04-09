@@ -3,15 +3,15 @@ interface ImpactBadgeProps {
 }
 
 const STYLES: Record<string, string> = {
-  HIGH: "bg-destructive/15 text-destructive",
-  MEDIUM: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400",
-  LOW: "bg-muted text-muted-foreground",
+  HIGH: "bg-red-50 text-red-600 dark:bg-red-500/20 dark:text-red-400",
+  MEDIUM: "bg-amber-50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400",
+  LOW: "bg-green-50 text-green-600 dark:bg-green-500/20 dark:text-green-400",
 };
 
 export function ImpactBadge({ impact }: ImpactBadgeProps) {
   return (
     <span
-      className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${STYLES[impact] ?? STYLES.LOW}`}
+      className={`inline-block rounded px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${STYLES[impact] ?? STYLES.LOW}`}
     >
       {impact}
     </span>

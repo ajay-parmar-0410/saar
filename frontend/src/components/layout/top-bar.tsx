@@ -43,7 +43,7 @@ export function TopBar() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight">Saar</span>
+          <span className="text-xl font-extrabold tracking-tight">Saar</span>
         </div>
 
         <div className="relative" ref={menuRef}>

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,7 +16,7 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -46,19 +45,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Saar</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your daily briefing, distilled.
-          </p>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 dark:bg-slate-900">
+      {/* Brand */}
+      <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-primary">
+        Saar
+      </h1>
+
+      {/* Login card */}
+      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-800">
+        <h2 className="text-center text-xl font-bold text-slate-900 dark:text-white">
+          Welcome back!
+        </h2>
+        <p className="mt-1 text-center text-sm text-slate-500 dark:text-slate-400">
+          Sign in to get your daily briefing
+        </p>
 
         {/* Google Sign In */}
-        <Button
-          variant="outline"
-          className="flex w-full items-center justify-center gap-3"
+        <button
           disabled={googleLoading}
           onClick={async () => {
             setGoogleLoading(true);
@@ -69,6 +72,7 @@ export default function LoginPage() {
               setGoogleLoading(false);
             }
           }}
+          className="mt-6 flex min-h-[48px] w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
         >
           <svg className="size-5" viewBox="0 0 24 24">
             <path
@@ -89,44 +93,39 @@ export default function LoginPage() {
             />
           </svg>
           {googleLoading ? "Redirecting..." : "Continue with Google"}
-        </Button>
+        </button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              or
-            </span>
-          </div>
+        {/* Divider */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          <span className="text-xs font-medium uppercase text-slate-400">or</span>
+          <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
         </div>
 
         {/* Magic Link */}
         {status === "sent" ? (
-          <div className="rounded-lg border border-border bg-card p-6 text-center">
-            <h2 className="text-lg font-semibold">Check your email</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              We sent a magic link to <strong>{email}</strong>.
-              <br />
-              Click the link to sign in.
+          <div className="rounded-xl bg-primary/5 p-5 text-center dark:bg-primary/10">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+              Check your email
+            </h3>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              We sent a magic link to <strong className="text-foreground">{email}</strong>.
             </p>
-            <Button
-              variant="ghost"
-              className="mt-4"
+            <button
+              className="mt-4 text-sm font-medium text-primary hover:underline"
               onClick={() => setStatus("idle")}
             >
               Use a different email
-            </Button>
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-foreground"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300"
               >
-                Email address
+                Email
               </label>
               <input
                 id="email"
@@ -135,7 +134,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="mt-1.5 block min-h-[48px] w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm placeholder:text-slate-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:border-slate-700 dark:bg-slate-700 dark:placeholder:text-slate-500 dark:focus:bg-slate-600"
                 disabled={status === "sending"}
               />
             </div>
@@ -144,16 +143,21 @@ export default function LoginPage() {
               <p className="text-sm text-destructive">{errorMessage}</p>
             )}
 
-            <Button
+            <button
               type="submit"
-              className="w-full"
               disabled={status === "sending"}
+              className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
               {status === "sending" ? "Sending..." : "Send Magic Link"}
-            </Button>
+            </button>
           </form>
         )}
       </div>
+
+      {/* Footer */}
+      <p className="mt-8 text-center text-xs text-slate-400">
+        By signing in, you agree to our terms of service.
+      </p>
     </div>
   );
 }

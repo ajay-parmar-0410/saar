@@ -34,10 +34,10 @@ export function TopStoryCard({ topStory, generatedAt }: TopStoryCardProps) {
         Top Story
       </span>
 
-      <h2 className="mt-3 text-lg font-bold leading-snug">{title}</h2>
+      <h2 className="mt-3 text-lg font-bold leading-snug break-words">{title}</h2>
 
       {summary && (
-        <p className="mt-2 text-sm leading-relaxed text-slate-400">{summary}</p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-400 break-words">{summary}</p>
       )}
 
       {generatedAt && (

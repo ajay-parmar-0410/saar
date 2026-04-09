@@ -16,14 +16,14 @@ export function BriefingCard({ item, featured = false, generatedAt }: BriefingCa
       href={item.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`block rounded-xl border border-slate-100 bg-card transition-all hover:border-slate-200 hover:shadow-sm dark:border-slate-800 dark:hover:border-slate-700 ${
+      className={`block overflow-hidden rounded-xl border border-slate-100 bg-card transition-all hover:border-slate-200 hover:shadow-sm dark:border-slate-800 dark:hover:border-slate-700 ${
         featured ? "p-5" : "p-4"
       }`}
     >
       <ImpactBadge impact={item.impact} />
 
       <h3
-        className={`mt-2 font-semibold leading-snug text-foreground ${
+        className={`mt-2 font-semibold leading-snug text-foreground break-words ${
           featured ? "text-base" : "text-sm"
         }`}
       >
@@ -31,7 +31,7 @@ export function BriefingCard({ item, featured = false, generatedAt }: BriefingCa
       </h3>
 
       <p
-        className={`mt-1 leading-relaxed text-muted-foreground ${
+        className={`mt-1 leading-relaxed text-muted-foreground break-words ${
           featured ? "text-sm" : "text-xs"
         }`}
       >
